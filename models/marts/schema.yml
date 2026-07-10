@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: dim_products_enriched
+    description: One row per product SKU, enriched with aggregated supply cost and baseline margin.
+    columns:
+      - name: product_id
+        description: Primary key. Product SKU.
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_order_items
+    description: >
+      One row per line item sold (order/product grain). Carries per-line revenue, aggregated
+      supply cost, and gross margin, enabling profitability analysis by product type, store,
+      and perishability of linked supplies.
+    columns:
+      - name: item_id
+        description: Primary key. Unique identifier for a single order line item.
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to the order this item belongs to.
+        tests:
+          - not_null
+      - name: product_id
+        description: Foreign key to dim_products_enriched (product SKU).
+        tests:
+          - not_null
+      - name: item_revenue
+        description: Revenue attributed to this line item (product price, one unit per row).
+      - name: item_cost
+        description: Aggregated supply cost attributed to this line item.
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: item_perishable_cost
+        description: Portion of item_cost coming from supplies marked perishable for this SKU.
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: item_non_perishable_cost
+        description: Portion of item_cost coming from supplies marked non-perishable for this SKU.
+      - name: item_gross_margin
+        description: item_revenue minus item_cost for this line item.

@@ -6,3 +6,7 @@ profiles.yml
 .DS_Store
 .vscode/
 dbt_internal_packages/
+bigquery-key.json
+*.json.key
+.user.yml
+env/

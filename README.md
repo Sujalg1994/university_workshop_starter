@@ -228,3 +228,24 @@ At the end of the workshop you will:
 - Have a link to your GitHub repo
 - Present what you have done covering the items in the `Workshop requirements checklist` above
 - Bonus: You may choose to also produce a dashboard (can be screenshots), SQL queries in BigQuery, or a Python notebook that tells the story.
+
+---
+
+## Analytics Write-Up: Profitability (Option A)
+
+**Primary question:** Which product types generate the highest gross profit, and what share of margin erosion is attributable to perishable supply costs?
+
+**Success criteria:** `fct_order_items` (grain: one row per order line) carries per-line revenue, aggregated supply cost, and gross margin, letting every supporting question be answered with one `GROUP BY` query.
+
+**Data note:** All 686 orders in the seed data belong to a single store (Philadelphia); the other 5 stores in `stg_stores` have no order history. Store-level profitability comparisons aren't possible with this dataset, so the analysis is cut by `product_type` instead.
+
+**Insight:**
+
+| product_type | revenue | cost | gross profit | margin % | perishable cost share |
+|---|---|---|---|---|---|
+| beverage | $451,000 | $89,089 | $361,911 | 80.25% | 72.89% |
+| jaffle | $230,800 | $51,483 | $179,317 | 77.69% | 89.18% |
+
+Beverages lead on both revenue and profit — there's no revenue/profit ranking reversal here. The real signal is the **perishable cost share**: jaffles source 89% of their supply cost from perishable inputs vs. 73% for beverages, and that ~16-point gap lines up with jaffles running a 2.5-point-lower margin. Perishable input exposure, not overall demand, is the main lever separating the two product lines' profitability.
+
+**Next step:** Prioritize renegotiating supplier contracts (or exploring shelf-stable substitutes) for the perishable ingredients behind jaffles specifically — that's where a cost reduction would move margin the most. As more stores start generating order volume, re-run this model cut by `store_id` as well to check whether the pattern holds geographically.

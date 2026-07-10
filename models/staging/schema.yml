@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: One row per customer.
+    columns:
+      - name: customer_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: One row per order.
+    columns:
+      - name: order_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to stg_customers.
+        tests:
+          - not_null
+      - name: store_id
+        description: Foreign key to stg_stores.
+        tests:
+          - not_null
+
+  - name: stg_items
+    description: One row per line item within an order (no quantity field; each row represents one unit sold).
+    columns:
+      - name: item_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to stg_orders.
+        tests:
+          - not_null
+      - name: sku
+        description: Product SKU sold on this line. Joins to stg_products.product_id.
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: One row per product SKU.
+    columns:
+      - name: product_id
+        description: Primary key. Product SKU.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_stores
+    description: One row per store location.
+    columns:
+      - name: store_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_supplies
+    description: >
+      One row per (supply, SKU) pairing — the same supply_id (e.g. "napkin") repeats across
+      every SKU it's used for, so supply_id alone is NOT unique. Grain is the (supply_id,
+      product_id) pair. Multiple rows can map to a single SKU (fan-out risk — aggregated to
+      SKU grain downstream in int_supply_costs_per_sku).
+    columns:
+      - name: supply_id
+        description: Supply type identifier. Repeats across SKUs — not a standalone primary key.
+        tests:
+          - not_null
+      - name: product_id
+        description: Foreign key to stg_products.product_id (the SKU this supply is used for).
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - supply_id
+              - product_id

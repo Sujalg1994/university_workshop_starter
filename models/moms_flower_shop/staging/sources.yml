@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: flower_shop_raw
+    database: project-f6989350-44be-4ddd-abb
+    schema: raw
+    tables:
+      - name: raw_customers
+      - name: raw_addresses
+      - name: raw_website_events
+      - name: raw_marketing_campaign_events
+      - name: raw_flower_orders
